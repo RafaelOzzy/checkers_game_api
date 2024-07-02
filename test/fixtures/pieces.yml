@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  game: one
+  player: 1
+  row: 1
+  col: 1
+  king: false
+
+two:
+  game: two
+  player: 1
+  row: 1
+  col: 1
+  king: false
