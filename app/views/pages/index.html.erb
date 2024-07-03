@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkers Game</title>
+  <%= stylesheet_link_tag 'styles', media: 'all' %>
+  <%= javascript_include_tag 'scripts' %>
+</head>
+<body>
+  <div id="controls">
+    <button id="create-game">Create New Game</button>
+    <button id="join-game">Join Game</button>
+  </div>
+  <div id="game-info">
+    <p id="game-id">Game ID: <span></span></p>
+    <p id="player2-token">Player 2 Token: <span></span></p>
+  </div>
+  <div id="game-board"></div>
+</body>
+</html>
