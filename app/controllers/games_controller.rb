@@ -136,6 +136,5 @@ class GamesController < ApplicationController
 
   def switch_turns
     @game.update(status: @game.status == 'player_1_turn' ? 'player_2_turn' : 'player_1_turn')
-
   end
 end
