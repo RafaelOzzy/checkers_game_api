@@ -1,8 +1,241 @@
+// document.addEventListener('DOMContentLoaded', function() {
+//   const board = document.getElementById('game-board');
+//   const apiUrl = 'http://localhost:3000'; // Atualize com a URL da sua API
+//   let gameId;
+//   let gameToken;
+//   let selectedPiece = null;
+//   let possibleMoves = [];
+
+//   function initializeBoard() {
+//     board.innerHTML = '';
+//     for (let row = 0; row < 8; row++) {
+//       for (let col = 0; col < 8; col++) {
+//         const square = document.createElement('div');
+//         square.className = 'square';
+//         square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+//         square.dataset.row = row;
+//         square.dataset.col = col;
+//         square.addEventListener('click', () => handleSquareClick(row, col));
+//         board.appendChild(square);
+//       }
+//     }
+//   }
+
+//   function loadPieces(pieces) {
+//     pieces.forEach(piece => {
+//       const pieceElement = document.createElement('div');
+//       pieceElement.className = `piece player${piece.player}`;
+//       if (piece.king) {
+//         pieceElement.classList.add('king');
+//       }
+//       pieceElement.dataset.id = piece.id;
+//       pieceElement.style.top = `${piece.row * 50}px`;
+//       pieceElement.style.left = `${piece.col * 50}px`;
+//       pieceElement.addEventListener('click', (e) => {
+//         e.stopPropagation();
+//         handlePieceClick(piece);
+//       });
+//       board.appendChild(pieceElement);
+//     });
+//   }
+
+//   function handlePieceClick(piece) {
+//     if (selectedPiece && selectedPiece.id === piece.id) {
+//       deselectPiece();
+//     } else {
+//       selectPiece(piece);
+//     }
+//   }
+
+//   function handleSquareClick(row, col) {
+//     if (selectedPiece && possibleMoves.some(move => move.row === row && move.col === col)) {
+//       movePiece(selectedPiece, row, col);
+//     }
+//   }
+
+//   function selectPiece(piece) {
+//     deselectPiece();
+//     selectedPiece = piece;
+//     document.querySelector(`.piece[data-id="${piece.id}"]`).classList.add('selected');
+//     fetchPossibleMoves(piece);
+//   }
+
+//   function deselectPiece() {
+//     if (selectedPiece) {
+//       const selectedElement = document.querySelector(`.piece[data-id="${selectedPiece.id}"]`);
+//       if (selectedElement) {
+//         selectedElement.classList.remove('selected');
+//       }
+//       selectedPiece = null;
+//       possibleMoves = [];
+//       updateBoardHighlight();
+//     }
+//   }
+
+//   function fetchPossibleMoves(piece) {
+//     fetch(`${apiUrl}/games/${gameId}/moves/${piece.id}`, {
+//       method: 'GET',
+//       headers: { 'Authorization': gameToken }
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//       possibleMoves = data.moves;
+//       updateBoardHighlight();
+//     });
+//   }
+
+//   function movePiece(piece, row, col) {
+//     fetch(`${apiUrl}/games/${gameId}/move`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': gameToken
+//       },
+//       body: JSON.stringify({
+//         piece_id: piece.id,
+//         destination: { row: row, col: col }
+//       })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//       if (data.success) {
+//         updatePiecePosition(piece.id, row, col);
+//         deselectPiece();
+//         fetchGameStatus();
+//         fetchGamePieces();
+//       } else {
+//         alert(data.error);
+//       }
+//     });
+//   }
+
+//   function updatePiecePosition(id, row, col) {
+//     const pieceElement = document.querySelector(`.piece[data-id="${id}"]`);
+//     if (pieceElement) {
+//       pieceElement.style.top = `${row * 50}px`;
+//       pieceElement.style.left = `${col * 50}px`;
+//     }
+//   }
+
+//   function updateBoardHighlight() {
+//     document.querySelectorAll('.square').forEach(square => {
+//       square.classList.remove('highlight');
+//     });
+//     possibleMoves.forEach(move => {
+//       const square = document.querySelector(`.square[data-row="${move.row}"][data-col="${move.col}"]`);
+//       if (square) {
+//         square.classList.add('highlight');
+//       }
+//     });
+//   }
+
+//   function createGame() {
+//     fetch(`${apiUrl}/games`, {
+//       method: 'POST'
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//       gameId = data.game_id;
+//       gameToken = data.game_token;
+//       document.getElementById('game-id').querySelector('span').textContent = gameId;
+//       document.getElementById('game-token').querySelector('span').textContent = gameToken;
+//       loadGame();
+//     })
+//     .catch(error => {
+//       console.error('Error creating game:', error);
+//     });
+//   }
+
+//   function joinGame() {
+//     const gameIdInput = document.getElementById('game-id-input').value;
+//     const gameTokenInput = document.getElementById('game-token-input').value;
+//     if (!gameIdInput || !gameTokenInput) {
+//       alert('Please enter a valid game ID and game token');
+//       return;
+//     }
+//     gameId = gameIdInput;
+//     gameToken = gameTokenInput;
+//     fetch(`${apiUrl}/games/${gameId}/join`, {
+//       method: 'POST',
+//       headers: { 'Authorization': gameToken }
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//       document.getElementById('game-id').querySelector('span').textContent = gameId;
+//       document.getElementById('game-token').querySelector('span').textContent = gameToken;
+//       loadGame();
+//     })
+//     .catch(error => {
+//       console.error('Error joining game:', error);
+//     });
+//   }
+
+//   function loadGame() {
+//     fetch(`${apiUrl}/games/${gameId}/pieces`, {
+//       method: 'GET',
+//       headers: { 'Authorization': gameToken }
+//     })
+//     .then(response => response.json())
+//     .then(pieces => {
+//       initializeBoard();
+//       loadPieces(pieces);
+//       fetchGameStatus();
+//     })
+//     .catch(error => {
+//       console.error('Error loading game:', error);
+//     });
+//   }
+
+//   function fetchGameStatus() {
+//     fetch(`${apiUrl}/games/${gameId}/status`, {
+//       method: 'GET',
+//       headers: { 'Authorization': gameToken }
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//       document.getElementById('game-status').querySelector('span').textContent = data.status;
+//     })
+//     .catch(error => {
+//       console.error('Error fetching game status:', error);
+//     });
+//   }
+
+//   function fetchGamePieces() {
+//     fetch(`${apiUrl}/games/${gameId}/pieces`, {
+//       method: 'GET',
+//       headers: { 'Authorization': gameToken }
+//     })
+//     .then(response => response.json())
+//     .then(pieces => {
+//       initializeBoard();
+//       loadPieces(pieces);
+//     })
+//     .catch(error => {
+//       console.error('Error fetching game pieces:', error);
+//     });
+//   }
+
+//   document.getElementById('create-game').addEventListener('click', createGame);
+
+//   document.getElementById('join-game').addEventListener('click', joinGame);
+
+//   initializeBoard();
+
+//   setInterval(() => {
+//     if (gameId && gameToken) {
+//       fetchGameStatus();
+//       fetchGamePieces();
+//     }
+//   }, 5000); // Atualiza o estado do jogo a cada 5 segundos
+// });
+
+// GAME WORKING
+
 document.addEventListener('DOMContentLoaded', function() {
   const board = document.getElementById('game-board');
   const apiUrl = 'http://localhost:3000'; // Atualize com a URL da sua API
   let gameId;
-  let playerToken;
+  let gameToken;
   let selectedPiece = null;
   let possibleMoves = [];
 
@@ -56,13 +289,19 @@ document.addEventListener('DOMContentLoaded', function() {
   function selectPiece(piece) {
     deselectPiece();
     selectedPiece = piece;
-    document.querySelector(`.piece[data-id="${piece.id}"]`).classList.add('selected');
+    const selectedElement = document.querySelector(`.piece[data-id="${piece.id}"]`);
+    if (selectedElement) {
+      selectedElement.classList.add('selected');
+    }
     fetchPossibleMoves(piece);
   }
 
   function deselectPiece() {
     if (selectedPiece) {
-      document.querySelector(`.piece[data-id="${selectedPiece.id}"]`).classList.remove('selected');
+      const selectedElement = document.querySelector(`.piece[data-id="${selectedPiece.id}"]`);
+      if (selectedElement) {
+        selectedElement.classList.remove('selected');
+      }
       selectedPiece = null;
       possibleMoves = [];
       updateBoardHighlight();
@@ -72,44 +311,24 @@ document.addEventListener('DOMContentLoaded', function() {
   function fetchPossibleMoves(piece) {
     fetch(`${apiUrl}/games/${gameId}/moves/${piece.id}`, {
       method: 'GET',
-      headers: { 'Authorization': playerToken }
+      headers: { 'Authorization': gameToken }
     })
     .then(response => response.json())
     .then(data => {
       possibleMoves = data.moves;
       updateBoardHighlight();
+    })
+    .catch(error => {
+      console.error('Error fetching possible moves:', error);
     });
   }
-
-  // function movePiece(piece, row, col) {
-  //   fetch(`${apiUrl}/games/${gameId}/move`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': playerToken }
-  //     ,
-  //     body: JSON.stringify({
-  //       piece_id: piece.id,
-  //       destination: { row: row, col: col }
-  //     })
-  //   })
-  //   .then(response => response.json())
-  //   .then(data => {
-  //     if (data.success) {
-  //       updatePiecePosition(piece.id, row, col);
-  //       deselectPiece();
-  //     } else {
-  //       alert(data.error);
-  //     }
-  //   });
-  // }
 
   function movePiece(piece, row, col) {
     fetch(`${apiUrl}/games/${gameId}/move`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': playerToken
+        'Authorization': gameToken
       },
       body: JSON.stringify({
         piece_id: piece.id,
@@ -121,6 +340,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (data.success) {
         updatePiecePosition(piece.id, row, col);
         deselectPiece();
+        fetchGameStatus();
+        fetchGamePieces();
       } else {
         alert(data.error);
       }
@@ -130,11 +351,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-
   function updatePiecePosition(id, row, col) {
     const pieceElement = document.querySelector(`.piece[data-id="${id}"]`);
-    pieceElement.style.top = `${row * 50}px`;
-    pieceElement.style.left = `${col * 50}px`;
+    if (pieceElement) {
+      pieceElement.style.top = `${row * 50}px`;
+      pieceElement.style.left = `${col * 50}px`;
+    }
   }
 
   function updateBoardHighlight() {
@@ -156,9 +378,9 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       gameId = data.game_id;
-      playerToken = data.player1_token;
+      gameToken = data.game_token;
       document.getElementById('game-id').querySelector('span').textContent = gameId;
-      document.getElementById('player2-token').querySelector('span').textContent = playerToken;
+      document.getElementById('game-token').querySelector('span').textContent = gameToken;
       loadGame();
     })
     .catch(error => {
@@ -166,15 +388,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  function joinGame(token) {
+  function joinGame() {
+    const gameIdInput = document.getElementById('game-id-input').value;
+    const gameTokenInput = document.getElementById('game-token-input').value;
+    if (!gameIdInput || !gameTokenInput) {
+      alert('Please enter a valid game ID and game token');
+      return;
+    }
+    gameId = gameIdInput;
+    gameToken = gameTokenInput;
     fetch(`${apiUrl}/games/${gameId}/join`, {
       method: 'POST',
-      headers: { 'Authorization': token }
+      headers: { 'Authorization': gameToken }
     })
     .then(response => response.json())
     .then(data => {
-      playerToken = data.player2_token;
-      document.getElementById('player2-token').querySelector('span').textContent = playerToken;
+      document.getElementById('game-id').querySelector('span').textContent = gameId;
+      document.getElementById('game-token').querySelector('span').textContent = gameToken;
       loadGame();
     })
     .catch(error => {
@@ -185,7 +415,37 @@ document.addEventListener('DOMContentLoaded', function() {
   function loadGame() {
     fetch(`${apiUrl}/games/${gameId}/pieces`, {
       method: 'GET',
-      headers: { 'Authorization': playerToken }
+      headers: { 'Authorization': gameToken }
+    })
+    .then(response => response.json())
+    .then(pieces => {
+      initializeBoard();
+      loadPieces(pieces);
+      fetchGameStatus();
+    })
+    .catch(error => {
+      console.error('Error loading game:', error);
+    });
+  }
+
+  function fetchGameStatus() {
+    fetch(`${apiUrl}/games/${gameId}/status`, {
+      method: 'GET',
+      headers: { 'Authorization': gameToken }
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('game-status').querySelector('span').textContent = data.status;
+    })
+    .catch(error => {
+      console.error('Error fetching game status:', error);
+    });
+  }
+
+  function fetchGamePieces() {
+    fetch(`${apiUrl}/games/${gameId}/pieces`, {
+      method: 'GET',
+      headers: { 'Authorization': gameToken }
     })
     .then(response => response.json())
     .then(pieces => {
@@ -193,16 +453,20 @@ document.addEventListener('DOMContentLoaded', function() {
       loadPieces(pieces);
     })
     .catch(error => {
-      console.error('Error loading game:', error);
+      console.error('Error fetching game pieces:', error);
     });
   }
 
   document.getElementById('create-game').addEventListener('click', createGame);
 
-  document.getElementById('join-game').addEventListener('click', () => {
-    const token = prompt('Enter game token:');
-    joinGame(token);
-  });
+  document.getElementById('join-game').addEventListener('click', joinGame);
 
   initializeBoard();
+
+  setInterval(() => {
+    if (gameId && gameToken) {
+      fetchGameStatus();
+      fetchGamePieces();
+    }
+  }, 5000); // Atualiza o estado do jogo a cada 5 segundos
 });

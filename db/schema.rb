@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_02_230052) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_05_211941) do
   create_table "games", force: :cascade do |t|
     t.string "status"
     t.string "player1_token"
     t.string "player2_token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "game_token"
   end
 
   create_table "pieces", force: :cascade do |t|
