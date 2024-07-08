@@ -28,7 +28,6 @@ RSpec.describe "Games", type: :request do
 
   describe "POST /move" do
     it "moves a piece" do
-      # Adicionando verificação de token de jogador e status do jogo
       game.update(status: 'player_1_turn')
       destination = { row: 1, col: 2 }
       post "/games/#{game.id}/move", params: { piece_id: piece.id, destination: destination }, headers: { Authorization: game.game_token, Player: '1' }
