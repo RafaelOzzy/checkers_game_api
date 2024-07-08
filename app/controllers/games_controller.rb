@@ -41,7 +41,6 @@ class GamesController < ApplicationController
     piece = @game.pieces.find(params[:piece_id])
     destination = params.require(:destination).permit(:row, :col).to_h.symbolize_keys
 
-    # Verify if it's the player's turn
     if (@game.status == 'player_1_turn' && request.headers['Player'] != '1') || (@game.status == 'player_2_turn' && request.headers['Player'] != '2')
       render json: { error: 'Not your turn' }, status: :unprocessable_entity
       return
@@ -77,7 +76,6 @@ class GamesController < ApplicationController
   end
 
   def initialize_pieces(game)
-    # Player 1's pieces (rows 0, 1, 2)
     [0, 1, 2].each do |row|
       (0..7).each do |col|
         if (row + col).odd?
@@ -86,7 +84,6 @@ class GamesController < ApplicationController
       end
     end
 
-    # Player 2's pieces (rows 5, 6, 7)
     [5, 6, 7].each do |row|
       (0..7).each do |col|
         if (row + col).odd?
@@ -98,11 +95,17 @@ class GamesController < ApplicationController
 
   def valid_move?(piece, destination)
     possible_moves = calculate_possible_moves(piece)
-    possible_moves.include?(destination)
+    capture_moves = possible_moves.select { |move| capture_move?(piece, move) }
+    if capture_moves.any?
+      capture_moves.include?(destination)
+    else
+      possible_moves.include?(destination)
+    end
   end
 
   def calculate_possible_moves(piece)
     moves = []
+    capture_moves = []
     directions = piece.king ? [[1, 1], [1, -1], [-1, 1], [-1, -1]] : piece.player == 1 ? [[1, 1], [1, -1]] : [[-1, 1], [-1, -1]]
 
     directions.each do |direction|
@@ -117,11 +120,11 @@ class GamesController < ApplicationController
       capture_col = piece.col + 2 * direction[1]
 
       if valid_position?(capture_row, capture_col) && empty_square?(capture_row, capture_col) && enemy_piece?(piece, new_row, new_col)
-        moves << { row: capture_row, col: capture_col }
+        capture_moves << { row: capture_row, col: capture_col }
       end
     end
 
-    moves
+    capture_moves.any? ? capture_moves : moves
   end
 
   def valid_position?(row, col)
@@ -164,4 +167,4 @@ class GamesController < ApplicationController
   end
 end
 
-# GAME WORKING
+# Game Working

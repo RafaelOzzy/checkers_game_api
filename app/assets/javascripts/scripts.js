@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let selectedPiece = null;
   let possibleMoves = [];
   let continueCapture = false;
+  let gameFinished = false;
 
   function initializeBoard() {
     board.innerHTML = '';
@@ -114,7 +115,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (data.success) {
         updatePiecePosition(piece.id, row, col);
         if (data.continue_capture) {
-          // The piece can continue capturing, keep it selected and fetch possible moves
           continueCapture = true;
           selectPiece(piece);
         } else {
@@ -219,6 +219,9 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       document.getElementById('game-status').querySelector('span').textContent = data.status;
+      if (data.status === 'player_1_won' || data.status === 'player_2_won') {
+        gameFinished = true;
+      }
     })
     .catch(error => {
       console.error('Error fetching game status:', error);
@@ -246,11 +249,11 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeBoard();
 
   setInterval(() => {
-    if (gameId && gameToken && !continueCapture) {
+    if (gameId && gameToken && !continueCapture && !gameFinished) {
       fetchGameStatus();
       fetchGamePieces();
     }
   }, 5000); // Atualiza o estado do jogo a cada 5 segundos
 });
 
-// GAME WORKING
+// Game working
