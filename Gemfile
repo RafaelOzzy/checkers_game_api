@@ -54,3 +54,11 @@ group :development do
 
   gem "error_highlight", ">= 0.4.0", platforms: [:ruby]
 end
+
+group :development, :test do
+  gem 'rspec-rails', '~> 5.0'
+end
+
+group :development, :test do
+  gem 'factory_bot_rails'
+end
