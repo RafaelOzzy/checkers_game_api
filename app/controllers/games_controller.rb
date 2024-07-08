@@ -1,5 +1,3 @@
-# GAME WORKING
-
 class GamesController < ApplicationController
   before_action :set_game, only: [:join, :status, :pieces, :moves, :move]
   before_action :validate_token, only: [:status, :pieces, :moves, :move]
@@ -58,7 +56,7 @@ class GamesController < ApplicationController
         render json: { success: true, piece: piece, continue_capture: false }
       end
     else
-      render json: { error: 'Invalid move' }, status: :unprocessable_entity
+      render json: { error: 'Invalid move or capture required' }, status: :unprocessable_entity
     end
   end
 
@@ -96,7 +94,9 @@ class GamesController < ApplicationController
   def valid_move?(piece, destination)
     possible_moves = calculate_possible_moves(piece)
     capture_moves = possible_moves.select { |move| capture_move?(piece, move) }
-    if capture_moves.any?
+    all_capture_moves = @game.pieces.where(player: piece.player).flat_map { |p| calculate_possible_moves(p).select { |move| capture_move?(p, move) } }
+
+    if all_capture_moves.any?
       capture_moves.include?(destination)
     else
       possible_moves.include?(destination)
@@ -166,5 +166,3 @@ class GamesController < ApplicationController
     @game.update(status: new_status)
   end
 end
-
-# Game Working
