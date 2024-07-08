@@ -1,5 +1,3 @@
-// GAME WORKING
-
 document.addEventListener('DOMContentLoaded', function() {
   const board = document.getElementById('game-board');
   const apiUrl = 'http://localhost:3000'; // Atualize com a URL da sua API
@@ -8,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let player;
   let selectedPiece = null;
   let possibleMoves = [];
+  let captureMovesAvailable = false;
   let continueCapture = false;
   let gameFinished = false;
 
@@ -90,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       possibleMoves = data.moves;
+      captureMovesAvailable = possibleMoves.some(move => Math.abs(piece.row - move.row) == 2);
       updateBoardHighlight();
     })
     .catch(error => {
@@ -255,5 +255,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 5000); // Atualiza o estado do jogo a cada 5 segundos
 });
-
-// Game working
