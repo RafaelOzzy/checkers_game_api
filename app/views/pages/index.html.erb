@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Checkers Game</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <%= stylesheet_link_tag 'styles', media: 'all' %>
   <%= javascript_include_tag 'scripts' %>
 </head>
 <body>
-  <div id="controls">
-    <button id="create-game">Create New Game</button>
-    <input type="text" id="game-id-input" placeholder="Enter Game ID" />
-    <input type="text" id="game-token-input" placeholder="Enter Game Token" />
-    <button id="join-game">Join Game</button>
+  <div id="container" class="container mt-5">
+    <div id="controls" class="mb-4">
+      <button id="create-game" class="btn btn-primary">Create New Game</button>
+      <input type="text" id="game-id-input" class="form-control my-2" placeholder="Enter Game ID" />
+      <input type="text" id="game-token-input" class="form-control mb-2" placeholder="Enter Game Token" />
+      <button id="join-game" class="btn btn-secondary">Join Game</button>
+    </div>
+    <div id="game-info" class="mb-4">
+      <p id="game-id">Game ID: <span></span></p>
+      <p id="game-token">Game Token: <span></span></p>
+      <p id="game-status">Status: <span></span></p>
+    </div>
+    <div id="game-board"></div>
   </div>
-  <div id="game-info">
-    <p id="game-id">Game ID: <span></span></p>
-    <p id="game-token">Game Token: <span></span></p>
-    <p id="game-status">Status: <span></span></p>
-  </div>
-  <div id="game-board"></div>
 </body>
 </html>

@@ -44,6 +44,11 @@ class GamesController < ApplicationController
       return
     end
 
+    if @game.status == 'player_1_won' || @game.status == 'player_2_won'
+      render json: { error: 'Game over' }, status: :unprocessable_entity
+      return
+    end
+
     if valid_move?(piece, destination)
       is_capture = capture_move?(piece, destination)
       capture_piece(piece, destination) if is_capture
@@ -52,8 +57,11 @@ class GamesController < ApplicationController
       if is_capture && can_continue_capture?(piece)
         render json: { success: true, piece: piece, continue_capture: true }
       else
-        switch_turns
-        render json: { success: true, piece: piece, continue_capture: false }
+        if check_victory_or_switch_turns
+          render json: { success: true, piece: piece, game_over: true, winner: @game.status == 'player_1_won' ? 'Player 1' : 'Player 2' }
+        else
+          render json: { success: true, piece: piece, continue_capture: false }
+        end
       end
     else
       render json: { error: 'Invalid move or capture required' }, status: :unprocessable_entity
@@ -158,6 +166,19 @@ class GamesController < ApplicationController
   def check_king(piece)
     if (piece.player == 1 && piece.row == 7) || (piece.player == 2 && piece.row == 0)
       piece.update(king: true)
+    end
+  end
+
+  def check_victory_or_switch_turns
+    if @game.pieces.where(player: 1).empty?
+      @game.update(status: 'player_2_won')
+      return true
+    elsif @game.pieces.where(player: 2).empty?
+      @game.update(status: 'player_1_won')
+      return true
+    else
+      switch_turns
+      return false
     end
   end
 

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   const board = document.getElementById('game-board');
-  const apiUrl = 'http://localhost:3000'; // Atualize com a URL da sua API
+  const apiUrl = 'http://localhost:3000';
   let gameId;
   let gameToken;
   let player;
@@ -44,7 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function handlePieceClick(piece) {
-    if (piece.player !== parseInt(player)) return; // Only allow the player to select their own pieces
+    if (gameFinished) return;
+    if (piece.player !== parseInt(player)) return;
 
     if (selectedPiece && selectedPiece.id === piece.id) {
       deselectPiece();
@@ -54,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function handleSquareClick(row, col) {
+    if (gameFinished) return;
     if (selectedPiece && possibleMoves.some(move => move.row === row && move.col === col)) {
       movePiece(selectedPiece, row, col);
     }
@@ -120,8 +122,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           continueCapture = false;
           deselectPiece();
-          fetchGameStatus();
-          fetchGamePieces();
+          if (data.game_over) {
+            gameFinished = true;
+            alert(`Game Over! ${data.winner} wins!`);
+          } else {
+            fetchGameStatus();
+            fetchGamePieces();
+          }
         }
       } else {
         alert(data.error);
@@ -160,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
       gameId = data.game_id;
       gameToken = data.game_token;
-      player = '1'; // The creator of the game is always player 1
+      player = '1';
       document.getElementById('game-id').querySelector('span').textContent = gameId;
       document.getElementById('game-token').querySelector('span').textContent = gameToken;
       loadGame();
@@ -179,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     gameId = gameIdInput;
     gameToken = gameTokenInput;
-    player = '2'; // The joiner of the game is always player 2
+    player = '2';
     fetch(`${apiUrl}/games/${gameId}/join`, {
       method: 'POST',
       headers: { 'Authorization': gameToken }
@@ -218,9 +225,10 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      document.getElementById('game-status').querySelector('span').textContent = data.status;
+      document.getElementById('game-status').querySelector('span').textContent = formatGameStatus(data.status);
       if (data.status === 'player_1_won' || data.status === 'player_2_won') {
         gameFinished = true;
+        alert(`Game Over! ${formatGameStatus(data.status)}!`);
       }
     })
     .catch(error => {
@@ -243,6 +251,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  function formatGameStatus(status) {
+    switch (status) {
+      case 'player_1_turn':
+        return 'Player 1 Turn';
+      case 'player_2_turn':
+        return 'Player 2 Turn';
+      case 'waiting_for_opponent':
+        return 'Waiting for Opponent';
+      case 'player_1_won':
+        return 'Player 1 Won';
+      case 'player_2_won':
+        return 'Player 2 Won';
+      default:
+        return status;
+    }
+  }
+
   document.getElementById('create-game').addEventListener('click', createGame);
   document.getElementById('join-game').addEventListener('click', joinGame);
 
@@ -253,5 +278,5 @@ document.addEventListener('DOMContentLoaded', function() {
       fetchGameStatus();
       fetchGamePieces();
     }
-  }, 5000); // Atualiza o estado do jogo a cada 5 segundos
+  }, 3000);
 });
